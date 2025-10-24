@@ -1,74 +1,68 @@
 <?php
 function highestPalindrome($s, $k) {
-    $chars = str_split($s); // pecah string menjadi array karakter
+    $chars = str_split($s); // Pecah string menjadi array karakter
     $n = strlen($s);
-    $result = makePalindrome($chars, 0, $n - 1, $k); // fungsi rekursif untuk membentuk palindrome
 
-     // Jika gagal membentuk palindrome
-    return $result === null ? "-1" : implode("", $result);
-}
-
-// Rekursi untuk membentuk palindrome tertinggi
-function makePalindrome($arr, $left, $right, $k) {
-    if ($left > $right) {
-        return $arr;
+     // Validasi khusus untuk string dengan panjang 1
+    if ($n == 1) {
+        return "-1";  // String dengan panjang 1 tidak perlu diubah
     }
 
-    // Jika tidak cukup langkah
-    if ($k < 0) {
-        return null;
-    }
-
-    // Kasus karakter tunggal di tengah
-    if ($left == $right) {
-        if ($k > 0) {
-            $arr[$left] = '9';
+    // Buat string menjadi palindrome dengan jumlah perubahan minimum
+    $changes = array_fill(0, $n, 0);
+    for ($left = 0, $right = $n - 1; $left < $right; $left++, $right--) {
+        if ($chars[$left] != $chars[$right]) {
+            $bigger = max($chars[$left], $chars[$right]);
+            $chars[$left] = $bigger;
+            $chars[$right] = $bigger;
+            $changes[$left] = 1;
+            $k--;
         }
-        return $arr;
     }
-
-    // Simpan karakter kiri dan kanan
-    $l = $arr[$left];
-    $r = $arr[$right];
-
-    // Kalau beda, ubah keduanya menjadi yang lebih besar
-    if ($l != $r) {
-        $bigger = $l > $r ? $l : $r;
-        $arr[$left] = $bigger;
-        $arr[$right] = $bigger;
-        $sub = makePalindrome($arr, $left + 1, $right - 1, $k - 1);
-    } else {
-        // Kalau sama, lanjut ke tengah tanpa mengubah
-        $sub = makePalindrome($arr, $left + 1, $right - 1, $k);
-    }
-
-    // Jika rekursi gagal
-    if ($sub === null) {
-        return null;
-    }
-
-    // Upgrade ke 9 kalau masih ada kesempatan
-    if ($sub[$left] != '9' && $k > 0) {
-        // Coba ganti keduanya jadi 9 jika masih bisa
-        if ($l != $r) {
-            // Sudah pakai 1 langkah, berarti masih sisa k-1
-            if ($k - 1 > 0) {
-                $sub[$left] = '9';
-                $sub[$right] = '9';
+    // Tingkatkan palindrome menjadi angka terbesar
+    for ($left = 0, $right = $n - 1; $left <= $right; $left++, $right--) {
+        if ($left == $right) { // Karakter di tengah (untuk string dengan panjang ganjil
+            if ($k > 0) {
+                $chars[$left] = '9';
+                $k--;
             }
         } else {
-            // Belum ubah, bisa langsung ubah jadi 9
-            if ($k - 2 >= 0) {
-                $sub[$left] = '9';
-                $sub[$right] = '9';
+            if ($chars[$left] != '9') {
+                // Jika salah satu karakter sudah diubah sebelumnya, hanya butuh 1 langkah
+                if ($changes[$left] == 1 && $k > 0) {
+                    $chars[$left] = '9';
+                    $chars[$right] = '9';
+                    $k--;
+                }
+                // Jika belum diubah, butuh 2 langkah
+                elseif ($changes[$left] == 0 && $k >= 2) {
+                    $chars[$left] = '9';
+                    $chars[$right] = '9';
+                    $k -= 2;
+                }
             }
         }
     }
 
-    return $sub;
+    // Validasi apakah string hasil adalah palindrome dan valid
+    if (!isPalindrome($chars) || $k < 0) {
+        return "-1";
+    }
+
+    return implode("", $chars);
 }
 
-// === Contoh penggunaan ===
-echo highestPalindrome("3943", 1) . "\n";   // Output: 3993
-echo highestPalindrome("932239", 2) . "\n"; // Output: 992299
+// Fungsi untuk memeriksa apakah array karakter adalah palindrome
+function isPalindrome($chars) {
+    $n = count($chars);
+    for ($i = 0; $i < $n / 2; $i++) {
+        if ($chars[$i] != $chars[$n - $i - 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+echo highestPalindrome("3942", 1) . "\n";
+echo highestPalindrome("932239", 2) . "\n";
 ?>
