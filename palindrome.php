@@ -63,6 +63,6 @@ function isPalindrome($chars) {
     return true;
 }
 
-echo highestPalindrome("3942", 1) . "\n";
+echo highestPalindrome("3943", 1) . "\n";
 echo highestPalindrome("932239", 2) . "\n";
 ?>
